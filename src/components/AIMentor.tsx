@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import AIAvatar from "./AIAvatar";
+import Avatar3D from "./Avatar3D";
 
 interface AIMentorProps {
   onBack: () => void;
@@ -313,9 +313,9 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
         </div>
       </div>
 
-      {/* AI Avatar */}
-      <div className="flex justify-center mb-6">
-        <AIAvatar isSpeaking={isSpeaking} message={currentAIMessage} />
+      {/* 3D AI Avatar */}
+      <div className="mb-6 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-4">
+        <Avatar3D isSpeaking={isSpeaking} message={currentAIMessage} />
       </div>
 
       <Card className="h-80 mb-4">
