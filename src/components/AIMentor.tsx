@@ -1,10 +1,10 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AIAvatar from "./AIAvatar";
 
 interface AIMentorProps {
   onBack: () => void;
@@ -29,6 +29,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiInput, setShowApiInput] = useState(true);
+  const [currentAIMessage, setCurrentAIMessage] = useState('');
   const { toast } = useToast();
   
   const recognitionRef = useRef<any>(null);
@@ -94,9 +95,18 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
         utterance.voice = hindiVoice;
       }
 
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        setCurrentAIMessage(text);
+      };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setCurrentAIMessage('');
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        setCurrentAIMessage('');
+      };
 
       synthRef.current.speak(utterance);
     }
@@ -106,6 +116,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
     if (synthRef.current) {
       synthRef.current.cancel();
       setIsSpeaking(false);
+      setCurrentAIMessage('');
     }
   };
 
@@ -302,14 +313,19 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
         </div>
       </div>
 
-      <Card className="h-96 mb-4">
+      {/* AI Avatar */}
+      <div className="flex justify-center mb-6">
+        <AIAvatar isSpeaking={isSpeaking} message={currentAIMessage} />
+      </div>
+
+      <Card className="h-80 mb-4">
         <CardHeader>
           <CardTitle className="flex items-center">
             <MessageCircle className="w-5 h-5 mr-2 text-pink-600" />
             बातचीत | Conversation
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-72 overflow-y-auto space-y-4">
+        <CardContent className="h-56 overflow-y-auto space-y-4">
           {messages.map((message, index) => (
             <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-xs p-3 rounded-lg ${
