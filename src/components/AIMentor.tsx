@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MessageCircle, Youtube } from "lucide-react";
+import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AIMentorProps {
@@ -25,7 +25,14 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [showApiInput, setShowApiInput] = useState(true);
   const { toast } = useToast();
+  
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
 
   const quickQuestions = [
     "मैं हर महीने कितना पैसा बचाऊं? | How much should I save monthly?",
@@ -34,55 +41,235 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
     "पैसा कहां निवेश करें? | Where to invest money?"
   ];
 
-  const handleSendMessage = () => {
+  // Initialize speech recognition
+  const initSpeechRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'hi-IN'; // Hindi by default, can be changed
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+        toast({
+          title: "Voice recognition error",
+          description: "Could not capture voice. Please try again.",
+        });
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  };
+
+  // Speech synthesis
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      synthRef.current = window.speechSynthesis;
+      
+      // Stop any ongoing speech
+      synthRef.current.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      // Try to find Hindi voice, fallback to default
+      const voices = synthRef.current.getVoices();
+      const hindiVoice = voices.find(voice => voice.lang.includes('hi') || voice.lang.includes('en-IN'));
+      if (hindiVoice) {
+        utterance.voice = hindiVoice;
+      }
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+
+      synthRef.current.speak(utterance);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (synthRef.current) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  const startListening = () => {
+    if (!recognitionRef.current) {
+      initSpeechRecognition();
+    }
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+    } else {
+      toast({
+        title: "Voice not supported",
+        description: "Your browser doesn't support voice recognition.",
+      });
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
+
+  const callAI = async (userMessage: string): Promise<string> => {
+    if (!apiKey) {
+      return "कृपया पहले अपनी OpenAI API key डालें। Please enter your OpenAI API key first.";
+    }
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful AI financial mentor for women in India. Respond in both Hindi and English. Focus on savings, investments, business ideas, and financial empowerment for women. Keep responses practical and encouraging. Always include both Hindi and English in your responses.'
+            },
+            {
+              role: 'user',
+              content: userMessage
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('AI API call failed');
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('AI API Error:', error);
+      return "माफ करें, मुझे कुछ तकनीकी समस्या हो रही है। कृपया दोबारा कोशिश करें। Sorry, I'm having technical difficulties. Please try again.";
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = { type: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     
-    // Simulate AI response with relevant advice
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(input);
-      setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 2000);
-
+    // Call real AI
+    const aiResponse = await callAI(input);
+    const aiMessage: Message = { 
+      type: 'ai', 
+      content: aiResponse,
+      videos: generateVideoSuggestions(input)
+    };
+    
+    setMessages(prev => [...prev, aiMessage]);
+    setIsLoading(false);
+    
+    // Speak the AI response
+    speakText(aiResponse);
+    
     setInput('');
   };
 
-  const generateAIResponse = (question: string): Message => {
+  const generateVideoSuggestions = (question: string): { title: string; url: string }[] => {
     const lowerQuestion = question.toLowerCase();
     
     if (lowerQuestion.includes('save') || lowerQuestion.includes('बचत')) {
-      return {
-        type: 'ai',
-        content: 'बचत के लिए यह सुझाव हैं: 1) अपनी आय का 20% हर महीने बचाएं 2) एक अलग बचत खाता खोलें 3) छोटी मात्रा से शुरुआत करें | For savings: 1) Save 20% of your income monthly 2) Open a separate savings account 3) Start with small amounts',
-        videos: [
-          { title: 'महिलाओं के लिए बचत टिप्स | Savings Tips for Women', url: 'https://youtube.com/watch?v=example1' },
-          { title: 'घरेलू बचत के तरीके | Home Savings Methods', url: 'https://youtube.com/watch?v=example2' }
-        ]
-      };
+      return [
+        { title: 'महिलाओं के लिए बचत टिप्स | Savings Tips for Women', url: 'https://youtube.com/results?search_query=savings+tips+for+women+hindi' },
+        { title: 'घरेलू बचत के तरीके | Home Savings Methods', url: 'https://youtube.com/results?search_query=home+savings+methods+hindi' }
+      ];
     } else if (lowerQuestion.includes('business') || lowerQuestion.includes('बिजनेस')) {
-      return {
-        type: 'ai',
-        content: 'छोटा बिजनेस शुरू करने के लिए: 1) अपने हुनर की पहचान करें 2) कम पैसे में शुरुआत करें 3) स्थानीय बाजार को समझें | To start small business: 1) Identify your skills 2) Start with low investment 3) Understand local market',
-        videos: [
-          { title: 'महिलाओं के लिए बिजनेस आइडिया | Business Ideas for Women', url: 'https://youtube.com/watch?v=example3' }
-        ]
-      };
-    } else {
-      return {
-        type: 'ai',
-        content: 'यह बहुत अच्छा सवाल है! मैं आपकी मदद करना चाहती हूं। क्या आप और विस्तार से बता सकती हैं? | That\'s a great question! I want to help you. Can you tell me more details?'
-      };
+      return [
+        { title: 'महिलाओं के लिए बिजनेस आइडिया | Business Ideas for Women', url: 'https://youtube.com/results?search_query=business+ideas+for+women+hindi' }
+      ];
     }
+    return [];
   };
 
   const handleQuickQuestion = (question: string) => {
     setInput(question);
-    handleSendMessage();
   };
+
+  if (showApiInput) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={onBack} className="mr-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            वापस | Back
+          </Button>
+          <h1 className="text-2xl font-bold">AI मेंटर सेटअप | AI Mentor Setup</h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>OpenAI API Key Required</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600">
+              AI मेंटर का उपयोग करने के लिए OpenAI API key की आवश्यकता है। | To use the AI Mentor, an OpenAI API key is required.
+            </p>
+            <Input
+              type="password"
+              placeholder="sk-... (OpenAI API Key)"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+            <div className="flex space-x-2">
+              <Button 
+                onClick={() => {
+                  if (apiKey.trim()) {
+                    setShowApiInput(false);
+                    initSpeechRecognition();
+                  } else {
+                    toast({
+                      title: "API Key Required",
+                      description: "Please enter your OpenAI API key to continue.",
+                    });
+                  }
+                }}
+                disabled={!apiKey.trim()}
+              >
+                शुरू करें | Start
+              </Button>
+              <Button variant="outline" onClick={onBack}>
+                रद्द करें | Cancel
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              आपकी API key सुरक्षित है और केवल आपके ब्राउज़र में स्टोर होती है। | Your API key is secure and only stored in your browser.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -92,6 +279,17 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
           वापस | Back
         </Button>
         <h1 className="text-2xl font-bold">AI मेंटर दीदी | AI Mentor Sister</h1>
+        <div className="ml-auto flex space-x-2">
+          {isSpeaking ? (
+            <Button variant="outline" size="sm" onClick={stopSpeaking}>
+              <VolumeX className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              <Volume2 className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card className="h-96 mb-4">
@@ -148,10 +346,18 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="अपना सवाल यहां लिखें... | Type your question here..."
+            placeholder="अपना सवाल यहां लिखें या बोलें... | Type or speak your question..."
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             className="text-base"
           />
+          <Button
+            variant="outline"
+            onClick={isListening ? stopListening : startListening}
+            disabled={isLoading}
+            className={isListening ? 'bg-red-100 border-red-300' : ''}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </Button>
           <Button onClick={handleSendMessage} disabled={isLoading}>
             भेजें | Send
           </Button>
