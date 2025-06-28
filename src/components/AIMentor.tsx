@@ -133,41 +133,48 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
 
   const callAI = async (userMessage: string): Promise<string> => {
     if (!apiKey) {
-      return "कृपया पहले अपनी OpenAI API key डालें। Please enter your OpenAI API key first.";
+      return "कृपया पहले अपनी Google Gemini API key डालें। Please enter your Google Gemini API key first.";
     }
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
+          contents: [{
+            parts: [{
+              text: `You are a helpful AI financial mentor for women in India. Respond in both Hindi and English. Focus on savings, investments, business ideas, and financial empowerment for women. Keep responses practical and encouraging. Always include both Hindi and English in your responses. User question: ${userMessage}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 64,
+            topP: 0.95,
+            maxOutputTokens: 500,
+          },
+          safetySettings: [
             {
-              role: 'system',
-              content: 'You are a helpful AI financial mentor for women in India. Respond in both Hindi and English. Focus on savings, investments, business ideas, and financial empowerment for women. Keep responses practical and encouraging. Always include both Hindi and English in your responses.'
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
             },
             {
-              role: 'user',
-              content: userMessage
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
             }
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
+          ]
         }),
       });
 
       if (!response.ok) {
-        throw new Error('AI API call failed');
+        throw new Error('Gemini API call failed');
       }
 
       const data = await response.json();
-      return data.choices[0].message.content;
+      return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      console.error('AI API Error:', error);
+      console.error('Gemini API Error:', error);
       return "माफ करें, मुझे कुछ तकनीकी समस्या हो रही है। कृपया दोबारा कोशिश करें। Sorry, I'm having technical difficulties. Please try again.";
     }
   };
@@ -229,15 +236,18 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
 
         <Card>
           <CardHeader>
-            <CardTitle>OpenAI API Key Required</CardTitle>
+            <CardTitle>Google Gemini API Key Required</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-gray-600">
-              AI मेंटर का उपयोग करने के लिए OpenAI API key की आवश्यकता है। | To use the AI Mentor, an OpenAI API key is required.
+              AI मेंटर का उपयोग करने के लिए Google Gemini API key की आवश्यकता है। | To use the AI Mentor, a Google Gemini API key is required.
+            </p>
+            <p className="text-sm text-blue-600">
+              Gemini API is FREE! Get your key at: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a>
             </p>
             <Input
               type="password"
-              placeholder="sk-... (OpenAI API Key)"
+              placeholder="AIza... (Google Gemini API Key)"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
@@ -250,7 +260,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
                   } else {
                     toast({
                       title: "API Key Required",
-                      description: "Please enter your OpenAI API key to continue.",
+                      description: "Please enter your Google Gemini API key to continue.",
                     });
                   }
                 }}
