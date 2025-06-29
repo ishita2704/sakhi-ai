@@ -2,10 +2,9 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX, Bot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar3D from "./Avatar3D";
-import Bot from "./Bot";
 
 interface AIMentorProps {
   onBack: () => void;
