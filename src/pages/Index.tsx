@@ -24,46 +24,60 @@ const Index = () => {
             {/* Hero Section */}
             <div className="relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-50 to-blue-50 opacity-70"></div>
-              <div className="relative text-center py-16 px-8">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-4 rounded-full shadow-lg">
-                    <Bot className="w-12 h-12 text-white" />
+              <div className="relative grid lg:grid-cols-2 gap-8 items-center py-16 px-8">
+                <div className="text-center lg:text-left">
+                  <div className="flex items-center justify-center lg:justify-start mb-6">
+                    <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-4 rounded-full shadow-lg">
+                      <Bot className="w-12 h-12 text-white" />
+                    </div>
                   </div>
-                </div>
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
-                  Sakhi AI
-                </h1>
-                <p className="text-2xl md:text-3xl font-semibold text-gray-800 mb-3">
-                  Your AI-Powered Financial Companion
-                </p>
-                <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
-                  Multilingual AI mentor helping women achieve financial independence through voice-based guidance, 
-                  personalized learning, and 24/7 support in Hindi and regional languages.
-                </p>
-                
-                {/* Key Features Pills */}
-                <div className="flex flex-wrap justify-center gap-3 mb-8">
-                  <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-pink-200 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-pink-500" />
-                    <span className="text-sm font-medium">Multilingual Support</span>
+                  <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                    Sakhi AI
+                  </h1>
+                  <p className="text-2xl md:text-3xl font-semibold text-gray-800 mb-3">
+                    Your AI-Powered Financial Companion
+                  </p>
+                  <p className="text-lg text-gray-600 mb-6 max-w-3xl leading-relaxed">
+                    Multilingual AI mentor helping women achieve financial independence through voice-based guidance, 
+                    personalized learning, and 24/7 support in Hindi and regional languages.
+                  </p>
+                  
+                  {/* Key Features Pills */}
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-8">
+                    <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-pink-200 flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-pink-500" />
+                      <span className="text-sm font-medium">Multilingual Support</span>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 flex items-center gap-2">
+                      <Mic className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm font-medium">Voice-Based Learning</span>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-200 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-medium">Mobile & WhatsApp</span>
+                    </div>
                   </div>
-                  <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 flex items-center gap-2">
-                    <Mic className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm font-medium">Voice-Based Learning</span>
-                  </div>
-                  <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-200 flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium">Mobile & WhatsApp</span>
-                  </div>
-                </div>
 
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  onClick={() => setActiveSection('mentor')}
-                >
-                  Start Your Journey with Sakhi AI
-                </Button>
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    onClick={() => setActiveSection('mentor')}
+                  >
+                    Start Your Journey with Sakhi AI
+                  </Button>
+                </div>
+                
+                {/* Hero Image */}
+                <div className="flex justify-center lg:justify-end">
+                  <div className="relative">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded-3xl blur opacity-30"></div>
+                    <img 
+                      src="/lovable-uploads/1c8a0de4-c4e6-4d2d-bfff-fa9fa05d5466.png" 
+                      alt="Woman managing finances with calculator and piggy bank" 
+                      className="relative rounded-2xl shadow-2xl max-w-md w-full h-auto object-cover"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -137,6 +151,40 @@ const Index = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Financial Success Story Section */}
+            <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 p-8 rounded-3xl mx-4">
+              <div className="grid lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                    Transform Your Financial Future with <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">AI Guidance</span>
+                  </h2>
+                  <p className="text-lg text-gray-600 mb-6">
+                    Join thousands of women who are building their financial independence through personalized AI mentorship, smart savings tracking, and multilingual support.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
+                      <div className="text-2xl font-bold text-green-600">₹50L+</div>
+                      <div className="text-sm text-gray-600">Savings Tracked</div>
+                    </div>
+                    <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
+                      <div className="text-2xl font-bold text-emerald-600">10,000+</div>
+                      <div className="text-sm text-gray-600">Women Empowered</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-green-200 to-emerald-200 rounded-2xl blur opacity-40"></div>
+                    <img 
+                      src="/lovable-uploads/1c8a0de4-c4e6-4d2d-bfff-fa9fa05d5466.png" 
+                      alt="Financial planning success" 
+                      className="relative rounded-xl shadow-xl max-w-sm w-full h-auto object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* AI Features Section */}
