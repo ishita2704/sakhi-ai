@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Sphere, Box } from '@react-three/drei';
@@ -150,13 +149,13 @@ const Avatar3D = ({ isSpeaking, message }: Avatar3DProps) => {
       
       {/* UI Overlay */}
       <div className="absolute bottom-4 left-4 text-white bg-black bg-opacity-50 px-3 py-2 rounded-lg">
-        <h3 className="font-semibold">मेंटर दीदी | Mentor Sister</h3>
+        <h3 className="font-semibold">सखी AI | Sakhi AI</h3>
         <p className="text-xs opacity-75">Click and drag to rotate • Scroll to zoom</p>
       </div>
       
       {isSpeaking && (
-        <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-          🎤 Speaking...
+        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse shadow-lg">
+          🎤 Sakhi AI Speaking...
         </div>
       )}
     </div>

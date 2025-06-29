@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, MessageCircle, Youtube, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar3D from "./Avatar3D";
+import Bot from "./Bot";
 
 interface AIMentorProps {
   onBack: () => void;
@@ -20,7 +21,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'ai',
-      content: 'नमस्ते! मैं आपकी AI मेंटर दीदी हूं। आप मुझसे बचत, निवेश, और पैसों के बारे में कुछ भी पूछ सकती हैं। Hello! I am your AI Mentor Sister. You can ask me anything about savings, investment, and money.'
+      content: 'नमस्ते! मैं सखी AI हूं, आपकी व्यक्तिगत वित्तीय सलाहकार। आप मुझसे बचत, निवेश, और पैसों के बारे में कुछ भी पूछ सकती हैं। Hello! I am Sakhi AI, your personal financial advisor. You can ask me anything about savings, investment, and money in Hindi or English.'
     }
   ]);
   const [input, setInput] = useState('');
@@ -156,7 +157,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are a helpful AI financial mentor for women in India. Respond in both Hindi and English. Focus on savings, investments, business ideas, and financial empowerment for women. Keep responses practical and encouraging. Always include both Hindi and English in your responses. User question: ${userMessage}`
+              text: `You are Sakhi AI, a helpful AI financial mentor specifically designed for women in India. You are multilingual and can respond in both Hindi and English. Your mission is to provide accessible, voice-first financial guidance focusing on savings, investments, business ideas, UPI usage, and financial empowerment for women. Keep responses practical, encouraging, and culturally sensitive. Always include both Hindi and English in your responses when appropriate. User question: ${userMessage}`
             }]
           }],
           generationConfig: {
@@ -240,18 +241,21 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={onBack} className="mr-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            वापस | Back
+            Back | वापस
           </Button>
-          <h1 className="text-2xl font-bold">AI मेंटर सेटअप | AI Mentor Setup</h1>
+          <h1 className="text-2xl font-bold">Sakhi AI Setup</h1>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Google Gemini API Key Required</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="w-6 h-6 text-pink-500" />
+              Google Gemini API Key Required
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-gray-600">
-              AI मेंटर का उपयोग करने के लिए Google Gemini API key की आवश्यकता है। | To use the AI Mentor, a Google Gemini API key is required.
+              To use Sakhi AI mentor, a Google Gemini API key is required. | सखी AI मेंटर का उपयोग करने के लिए Google Gemini API key की आवश्यकता है।
             </p>
             <p className="text-sm text-blue-600">
               Gemini API is FREE! Get your key at: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a>
@@ -276,15 +280,16 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
                   }
                 }}
                 disabled={!apiKey.trim()}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
               >
-                शुरू करें | Start
+                Start with Sakhi AI | शुरू करें
               </Button>
               <Button variant="outline" onClick={onBack}>
-                रद्द करें | Cancel
+                Cancel | रद्द करें
               </Button>
             </div>
             <p className="text-xs text-gray-500">
-              आपकी API key सुरक्षित है और केवल आपके ब्राउज़र में स्टोर होती है। | Your API key is secure and only stored in your browser.
+              Your API key is secure and only stored in your browser. | आपकी API key सुरक्षित है और केवल आपके ब्राउज़र में स्टोर होती है।
             </p>
           </CardContent>
         </Card>
@@ -297,9 +302,16 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
       <div className="flex items-center mb-6">
         <Button variant="ghost" onClick={onBack} className="mr-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          वापस | Back
+          Back | वापस
         </Button>
-        <h1 className="text-2xl font-bold">AI मेंटर दीदी | AI Mentor Sister</h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Bot className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+            Sakhi AI - Your AI Financial Mentor
+          </h1>
+        </div>
         <div className="ml-auto flex space-x-2">
           {isSpeaking ? (
             <Button variant="outline" size="sm" onClick={stopSpeaking}>
@@ -314,7 +326,7 @@ const AIMentor = ({ onBack }: AIMentorProps) => {
       </div>
 
       {/* 3D AI Avatar */}
-      <div className="mb-6 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-4">
+      <div className="mb-6 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-4 border border-pink-100">
         <Avatar3D isSpeaking={isSpeaking} message={currentAIMessage} />
       </div>
 
